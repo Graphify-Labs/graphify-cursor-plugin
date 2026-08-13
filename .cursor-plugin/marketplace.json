@@ -1,0 +1,18 @@
+{
+  "name": "graphify",
+  "owner": {
+    "name": "Graphify",
+    "email": "founders@graphify.com"
+  },
+  "metadata": {
+    "description": "Ground your coding agent in your codebase's knowledge graph.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "graphify",
+      "source": "./plugins/graphify",
+      "description": "Query your codebase's knowledge graph over MCP: entities, relationships, grounded paths, and the conventions a module actually follows."
+    }
+  ]
+}

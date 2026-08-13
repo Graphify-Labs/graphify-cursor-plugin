@@ -1,0 +1,21 @@
+{
+  "name": "graphify",
+  "displayName": "Graphify",
+  "version": "0.1.0",
+  "description": "Ground your coding agent in your codebase's knowledge graph. Query entities and relationships, trace grounded paths, and read the conventions a module actually follows, all over MCP.",
+  "author": {
+    "name": "Graphify",
+    "email": "founders@graphify.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "graphify",
+    "mcp",
+    "knowledge graph",
+    "code graph",
+    "code search",
+    "codebase context",
+    "code review"
+  ],
+  "logo": "assets/logo.png"
+}

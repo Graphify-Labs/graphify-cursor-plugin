@@ -1,0 +1,17 @@
+---
+description: Use Graphify's knowledge graph to ground answers about this codebase's structure, dependencies, and conventions
+alwaysApply: false
+---
+
+When a question is about how this codebase is structured, what calls or depends on
+what, where a symbol lives, or what conventions a module follows, use the Graphify
+MCP tools before guessing from open files alone. They read a graph of the whole
+indexed repo, not just the current context window.
+
+- `query_graph` — find entities and relationships across the indexed graph.
+- `get_node` — fetch one node with its edges, file span, and confidence tags.
+- `path` — trace the grounded path between two entities (how A reaches B).
+- `explain_style` — summarize the conventions a module actually follows.
+
+Every tool is read-only: nothing modifies code, the graph, or the account. Prefer a
+grounded answer from the graph over an inferred one, and cite the file spans it returns.
