@@ -6,17 +6,12 @@ import process from "node:process";
 
 const repoRoot = process.cwd();
 const errors = [];
-const warnings = [];
 
 const pluginNamePattern = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 const marketplaceNamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
 function addError(message) {
   errors.push(message);
-}
-
-function addWarning(message) {
-  warnings.push(message);
 }
 
 async function pathExists(targetPath) {
@@ -52,7 +47,12 @@ async function readJsonFile(filePath, context) {
   }
 
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      addError(`${context} must be a JSON object: ${filePath}`);
+      return null;
+    }
+    return parsed;
   } catch (error) {
     addError(`${context} contains invalid JSON (${filePath}): ${error.message}`);
     return null;
@@ -118,14 +118,11 @@ function isSafeRelativePath(value) {
   if (typeof value !== "string" || value.length === 0) {
     return false;
   }
-  if (value.startsWith("http://") || value.startsWith("https://")) {
-    return true;
-  }
-  if (path.isAbsolute(value)) {
+  const normalized = value.replace(/\\/g, "/");
+  if (path.isAbsolute(normalized) || /^[a-z][a-z0-9+.-]*:/i.test(normalized)) {
     return false;
   }
-  const normalized = path.posix.normalize(value.replace(/\\/g, "/"));
-  return !normalized.startsWith("../") && normalized !== "..";
+  return !normalized.split("/").includes("..");
 }
 
 function extractPathValues(value) {
@@ -152,7 +149,7 @@ function extractPathValues(value) {
 }
 
 async function validateReferencedPath(pluginDir, fieldName, pathValue, pluginName) {
-  if (pathValue.startsWith("http://") || pathValue.startsWith("https://")) {
+  if (fieldName === "logo" && /^https?:\/\//.test(pathValue)) {
     return;
   }
 
@@ -229,6 +226,39 @@ async function validateComponentFrontmatter(pluginDir, pluginName) {
         await validateFrontmatterFile(file, "command", ["name", "description"], pluginName);
       }
     }
+  }
+}
+
+// This repository ships a remote OAuth connection, with no local process or
+// static credentials. Fail closed if the connection shape changes accidentally.
+async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) {
+  for (const field of ["description", "version", "homepage", "repository", "license"]) {
+    if (typeof manifest[field] !== "string" || !manifest[field].trim()) {
+      addError(`graphify: publication metadata "${field}" must be nonempty.`);
+    }
+  }
+  if (manifest.version !== marketplaceVersion) {
+    addError("graphify: plugin and marketplace versions must match.");
+  }
+  if (typeof manifest.author?.name !== "string" || !manifest.author.name.trim()) {
+    addError("graphify: author.name must be nonempty.");
+  }
+  for (const file of ["README.md", "rules/graphify.mdc"]) {
+    if (!(await pathExists(path.join(pluginDir, file)))) {
+      addError(`graphify: required package file is missing: ${file}`);
+    }
+  }
+  if (manifest.mcpServers !== undefined) {
+    addError("graphify: keep the OAuth connection in the default mcp.json, without a manifest override.");
+  }
+  const config = await readJsonFile(path.join(pluginDir, "mcp.json"), "Graphify MCP configuration");
+  if (!config) return;
+  const servers = config.mcpServers;
+  const server = servers?.graphify;
+  if (Object.keys(config).length !== 1 || !servers || Array.isArray(servers) ||
+      Object.keys(servers).length !== 1 || !server || Array.isArray(server) ||
+      Object.keys(server).length !== 1 || server.url !== "https://api.graphify.com/mcp") {
+    addError("graphify: mcp.json must contain only mcpServers.graphify.url = https://api.graphify.com/mcp (no credentials, commands, or extra servers).");
   }
 }
 
@@ -344,14 +374,8 @@ async function main() {
 
     await validateComponentFrontmatter(pluginDir, entry.name);
 
-    const hooksPath = path.join(pluginDir, "hooks", "hooks.json");
-    if (!(await pathExists(hooksPath))) {
-      addWarning(`${entry.name}: no hooks/hooks.json file found (only needed when using hooks).`);
-    }
-
-    const mcpPath = path.join(pluginDir, "mcp.json");
-    if (!(await pathExists(mcpPath))) {
-      addWarning(`${entry.name}: no mcp.json file found (only needed when using MCP servers).`);
+    if (entry.name === "graphify") {
+      await validateGraphifyPackage(pluginDir, pluginManifest, marketplace.metadata?.version);
     }
   }
 
@@ -359,14 +383,6 @@ async function main() {
 }
 
 function summarizeAndExit() {
-  if (warnings.length > 0) {
-    console.log("Warnings:");
-    for (const warning of warnings) {
-      console.log(`- ${warning}`);
-    }
-    console.log("");
-  }
-
   if (errors.length > 0) {
     console.error("Validation failed:");
     for (const error of errors) {

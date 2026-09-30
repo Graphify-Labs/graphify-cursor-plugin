@@ -1,12 +1,14 @@
 {
   "name": "graphify",
   "displayName": "Graphify",
-  "version": "0.1.0",
-  "description": "Ground your coding agent in your codebase's knowledge graph. Query entities and relationships, trace grounded paths, and read the conventions a module actually follows, all over MCP.",
+  "version": "0.1.1",
+  "description": "Search indexed code, trace dependencies, assess change impact, and retrieve repository memory through Graphify's authenticated MCP server.",
   "author": {
-    "name": "Graphify",
+    "name": "Graphify Labs",
     "email": "founders@graphify.com"
   },
+  "homepage": "https://graphify.com",
+  "repository": "https://github.com/Graphify-Labs/graphify-cursor-plugin",
   "license": "MIT",
   "keywords": [
     "graphify",
