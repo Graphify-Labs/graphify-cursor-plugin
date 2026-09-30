@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Ground your coding agent in your codebase's knowledge graph.",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "plugins": [
     {

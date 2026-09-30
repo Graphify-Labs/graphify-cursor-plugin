@@ -1,6 +1,6 @@
 # Cursor marketplace submission
 
-Prepared on 2026-09-30 for Graphify 0.1.1. This is submission preparation, not a
+Prepared on 2026-09-30 for Graphify 0.1.2. This is submission preparation, not a
 claim of approval or an existing public listing.
 
 ## Current status
@@ -18,9 +18,19 @@ claim of approval or an existing public listing.
   code and refresh-token grants, and PKCE S256.
 - Backend source already allows Cursor's desktop loopback, native URI scheme, and
   documented web callback. No backend patch was needed for these checks.
-- **Still required:** local Cursor loading and an authenticated end-to-end smoke
-  test. The desktop controller became unavailable before discovery could be
-  verified; the public HTTP checks do not prove tool calls or OAuth completion.
+- Local smoke testing completed on 2026-09-30 in Cursor 3.21.18 against plugin
+  0.1.1, commit `fe567e0`: the plugin loaded with one rule and one MCP server,
+  24 tools became available, workspace/repository discovery succeeded, and a
+  known function resolved exactly to a file/line verified against public source.
+  Version 0.1.2 adds guidance about the observed lookup limitations; its MCP
+  connection configuration is identical. The revised guidance was statically
+  reviewed and package-validated, not separately tested in an agent conversation.
+- Missing-symbol behavior: `graphify_node` returned a different symbol marked
+  `resolved: semantic`. The agent correctly reported the substitution. The rule
+  and README now explicitly require treating such results as suggestions.
+- Remaining test coverage: caller queries succeeded with empty lists; a nonempty
+  call path, memory writes, fresh OAuth consent, and token refresh were not
+  separately demonstrated. These results do not establish exhaustive graph coverage.
 - **Still required:** publisher sign-in and submission. The application page
   displayed "Sign in to apply"; account-specific fields, existing applications,
   publisher verification, and any additional requirements were not visible.
@@ -39,7 +49,7 @@ Field names and additional requirements may differ.
 | Package directory | `plugins/graphify` |
 | Marketplace manifest | `.cursor-plugin/marketplace.json` |
 | Plugin manifest | `plugins/graphify/.cursor-plugin/plugin.json` |
-| Version | `0.1.1` |
+| Version | `0.1.2` |
 | Website | https://graphify.com |
 | Support | founders@graphify.com |
 | Issue tracker | https://github.com/Graphify-Labs/graphify-cursor-plugin/issues |
@@ -68,13 +78,16 @@ A Graphify account and an indexed repository are required. Sign in through OAuth
 and choose an authorized workspace and repository. Results reflect the indexed
 snapshot; graph analysis does not run tests or prove runtime behavior. Some tools
 persist repository memory, optional query trails, or workspace preferences, as
-described in their live schemas and the plugin README.
+described in their live schemas and the plugin README. Symbol lookup may return
+a labelled semantic suggestion when no exact match is available; verify the
+returned symbol and file before relying on it.
 
 **Release notes**
 
-Updated the plugin for the current Graphify MCP tools. Added workspace-selection
-guidance, accurate persistence disclosures, installation and troubleshooting
-instructions, publisher links, and automated package validation.
+Updated the bundled Graphify logo. Clarified semantic symbol suggestions and empty
+caller results in the agent rule and usage guide. Recorded successful local loading,
+authenticated discovery, and exact code lookup, with the remaining test coverage
+stated explicitly.
 
 ## Local smoke test
 
@@ -108,7 +121,7 @@ and pass/fail results:
 | Repository scope | Ask "List my Graphify workspaces and indexed repositories." Confirm only authorized scope is returned and choose the intended repository. |
 | Code evidence | Ask "Using Graphify, locate a known symbol in this repository and cite its file." Check the answer against an actual indexed file. |
 | Dependencies | Ask for callers or a path between two known connected symbols. Confirm the returned direction and evidence. |
-| Limitations | Ask for a deliberately nonexistent symbol. The agent reports missing evidence without inventing a result. |
+| Limitations | Ask for a deliberately nonexistent symbol. Inspect `resolved` and the returned symbol/file. A semantic fallback must be disclosed as a suggestion, not presented as proof that the requested exact symbol exists. |
 | Memory and approvals | Read existing repository memory. Only test `remember` if intentionally saving a test note; verify the returned save/review status. Do not change workspace unless intended. |
 
 Do not claim these authenticated tests passed until they have been performed.
@@ -117,9 +130,9 @@ of public issues, screenshots, and this repository.
 
 ## Final publisher steps
 
-1. Merge the preparation PR after reviewing its changes and CI result.
-2. Complete the local smoke test above, fixing any authentication or discovery
-   issue before submitting.
+1. Merge the 0.1.2 guidance update after reviewing its changes and CI result.
+2. Review the recorded smoke-test results and coverage above. Rerun applicable
+   checks if the connection configuration or server behavior changes.
 3. Sign in at [Cursor's publisher application](https://cursor.com/marketplace/publish).
    Confirm whether Graphify already has an application before creating another.
    Submit this public repository URL and use the listing copy above where relevant.

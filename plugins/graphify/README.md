@@ -61,6 +61,12 @@ uncommitted edits. Inspect local code before changing it. Static graph analysis
 does not prove runtime behavior, security, or exhaustive test coverage. Saved
 memories may contain historical or unverified statements.
 
+Symbol lookup can use semantic fallback. If `graphify_node` cannot resolve an
+exact match, it may return a different symbol with `resolved: semantic`, including
+for a nonexistent name. Treat it as a suggestion and verify the returned symbol
+and file before relying on it. An empty caller list means no matching indexed
+callers were returned; it is not proof that a function is unused.
+
 See Graphify's [privacy policy](https://graphify.com/privacy) for processing,
 retention, and subprocessors, and its [terms](https://graphify.com/terms) for
 service conditions. Plugin source licensing does not confer hosted service access.
