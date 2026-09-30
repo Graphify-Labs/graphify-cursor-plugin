@@ -1,7 +1,7 @@
 {
   "name": "graphify",
   "displayName": "Graphify",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Search indexed code, trace dependencies, assess change impact, and retrieve repository memory through Graphify's authenticated MCP server.",
   "author": {
     "name": "Graphify Labs",

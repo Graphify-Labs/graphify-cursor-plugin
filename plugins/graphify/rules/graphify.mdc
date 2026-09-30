@@ -16,6 +16,13 @@ server's current tool schemas and follow their required inputs and annotations.
   `graphify_node` to inspect one. Use `graphify_callers`, `graphify_callees`, or
   `graphify_trace` for directed call relationships; use `shortest_path` for a
   connection that need not be a directed call chain.
+- Check the returned symbol, file, and `resolved` value before citing a lookup.
+  `graphify_node` can return `resolved: semantic` and a different symbol when no
+  exact match exists. Treat that result as a suggestion: say the requested exact
+  symbol was not resolved, disclose the substituted symbol, and verify it before
+  answering or editing. A successful tool call alone does not establish a match.
+  An empty caller list means no matching callers were returned from the index;
+  it does not prove that the symbol is unused.
 - Use `graphify_impact` or `impact_and_risk` for graph-based change analysis and
   `graphify_tests_for` to locate linked tests. These do not run tests or prove
   runtime behavior or complete test coverage.
