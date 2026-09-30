@@ -1,24 +1,31 @@
 # Graphify Cursor plugin
 
-The official [Graphify](https://graphify.com) plugin for the Cursor Marketplace.
+The official [Graphify](https://graphify.com) plugin source for Cursor. It connects
+Cursor to Graphify's authenticated MCP server and supplies a rule for using
+indexed code and repository memory with appropriate scope and citations.
 
-Graphify indexes your repositories into a knowledge graph of entities and relationships.
-This plugin points your coding agent at the Graphify MCP server so it can query that
-graph directly instead of inferring structure from whatever files are open.
-
-## Plugins in this repo
-
-| Plugin | Description |
+| Plugin | Contents |
 | --- | --- |
-| [`graphify`](./plugins/graphify) | Query your codebase's knowledge graph over MCP: entities, relationships, grounded paths, and module conventions. |
+| [`graphify`](./plugins/graphify) | Remote MCP connection and a code investigation rule |
 
-## Develop
+See the [plugin guide](./plugins/graphify/README.md) for setup, available tools,
+data handling, limitations, and troubleshooting. A Graphify account with an
+indexed repository is required. Marketplace availability depends on Cursor's
+review; local testing and manual MCP configuration are available now.
 
-Validate before submitting:
+## Validate and publish
+
+Run from the repository root with Node.js 22 or later:
 
 ```bash
 node scripts/validate-template.mjs
 ```
 
-See each plugin's own README for setup and the tool surface. Publishing is handled
-through the [Cursor Marketplace](https://cursor.com) publisher application.
+CI runs the same package checks. The [submission guide](./docs/cursor-submission.md)
+contains the local smoke test, prepared listing copy, evidence, and the remaining
+publisher steps. Submit the public repository through the
+[Cursor publisher application](https://cursor.com/marketplace/publish).
+
+The plugin package is [MIT licensed](./LICENSE). Use of the hosted Graphify service
+is governed by its [terms](https://graphify.com/terms) and
+[privacy policy](https://graphify.com/privacy).
