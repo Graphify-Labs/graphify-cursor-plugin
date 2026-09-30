@@ -84,9 +84,10 @@ returned symbol and file before relying on it.
 
 **Release notes**
 
-Clarified semantic symbol suggestions and empty caller results in the agent rule
-and usage guide. Recorded successful local loading, authenticated discovery, and
-exact code lookup, with the remaining test coverage stated explicitly.
+Updated the bundled Graphify logo. Clarified semantic symbol suggestions and empty
+caller results in the agent rule and usage guide. Recorded successful local loading,
+authenticated discovery, and exact code lookup, with the remaining test coverage
+stated explicitly.
 
 ## Local smoke test
 
