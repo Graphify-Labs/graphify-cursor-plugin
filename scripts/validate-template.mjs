@@ -3,15 +3,18 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = process.cwd();
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const errors = [];
 
 const pluginNamePattern = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 const marketplaceNamePattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
 function addError(message) {
-  errors.push(message);
+  if (!errors.includes(message)) {
+    errors.push(message);
+  }
 }
 
 async function pathExists(targetPath) {
@@ -28,6 +31,12 @@ async function ensureDirectory(targetPath, context) {
     const stat = await fs.stat(targetPath);
     if (!stat.isDirectory()) {
       addError(`${context} exists but is not a directory: ${targetPath}`);
+      return false;
+    }
+    // Reject the directory itself, or any parent inside the repo, being a symlink.
+    const realRelative = path.relative(await fs.realpath(repoRoot), await fs.realpath(targetPath));
+    if (realRelative !== path.relative(repoRoot, targetPath)) {
+      addError(`${context} must not be or sit under a symlink: ${path.relative(repoRoot, targetPath)}`);
       return false;
     }
     return true;
@@ -69,12 +78,12 @@ function parseFrontmatter(content) {
     return null;
   }
 
-  const closingIndex = normalized.indexOf("\n---\n", 4);
-  if (closingIndex === -1) {
+  const closing = /\n---(?:\n|$)/.exec(normalized.slice(3));
+  if (!closing) {
     return null;
   }
 
-  const frontmatterBlock = normalized.slice(4, closingIndex);
+  const frontmatterBlock = normalized.slice(4, closing.index + 3);
   const fields = {};
 
   for (const line of frontmatterBlock.split("\n")) {
@@ -87,7 +96,7 @@ function parseFrontmatter(content) {
       continue;
     }
     const key = line.slice(0, separator).trim();
-    const value = line.slice(separator + 1).trim();
+    const value = line.slice(separator + 1).trim().replace(/^(["'])(.*)\1$/, "$2").trim();
     fields[key] = value;
   }
 
@@ -107,6 +116,8 @@ async function walkFiles(dirPath) {
         stack.push(entryPath);
       } else if (entry.isFile()) {
         files.push(entryPath);
+      } else if (entry.isSymbolicLink()) {
+        addError(`Symlinks are not allowed in plugin packages: ${path.relative(repoRoot, entryPath)}`);
       }
     }
   }
@@ -248,6 +259,10 @@ async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) 
       addError(`graphify: required package file is missing: ${file}`);
     }
   }
+  await walkFiles(pluginDir);
+  if (manifest.hooks !== undefined || (await pathExists(path.join(pluginDir, "hooks")))) {
+    addError("graphify: hooks are not allowed; the package must not run local code.");
+  }
   if (manifest.mcpServers !== undefined) {
     addError("graphify: keep the OAuth connection in the default mcp.json, without a manifest override.");
   }
@@ -301,10 +316,11 @@ async function main() {
     return;
   }
 
-  const pluginRoot = marketplace.metadata?.pluginRoot;
+  let pluginRoot = marketplace.metadata?.pluginRoot;
   if (pluginRoot !== undefined) {
     if (typeof pluginRoot !== "string" || !isSafeRelativePath(pluginRoot)) {
       addError('Marketplace "metadata.pluginRoot" must be a safe relative path.');
+      pluginRoot = undefined;
     } else {
       const pluginRootAbs = path.join(repoRoot, pluginRoot);
       await ensureDirectory(pluginRootAbs, 'Marketplace "metadata.pluginRoot"');

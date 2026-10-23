@@ -36,7 +36,7 @@ approval annotations. Availability can vary with server configuration and access
 | --- | --- |
 | `list_workspaces`, `list_repositories` | Discover accessible scope and repository IDs. |
 | `set_workspace` | Select the active workspace and update the account's default workspace. |
-| `query_graph`, `graphify_find`, `graphify_node` | Search indexed code and inspect symbols. |
+| `query_graph`, `graphify_find`, `graphify_rank_files`, `graphify_node` | Search indexed code, find relevant files, and inspect symbols. |
 | `graphify_callers`, `graphify_callees`, `graphify_trace` | Investigate directed call relationships. |
 | `shortest_path` | Find a connecting graph path, which need not be a directed call chain. |
 | `graphify_impact`, `impact_and_risk`, `graphify_tests_for` | Explore potential change impact and linked tests. These do not execute tests. |
