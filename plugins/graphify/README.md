@@ -40,8 +40,9 @@ approval annotations. Availability can vary with server configuration and access
 | `graphify_callers`, `graphify_callees`, `graphify_trace` | Investigate directed call relationships. |
 | `shortest_path` | Find a connecting graph path, which need not be a directed call chain. |
 | `graphify_impact`, `impact_and_risk`, `graphify_tests_for` | Explore potential change impact and linked tests. These do not execute tests. |
-| `recall`, `memories_about` | Retrieve saved repository context. |
-| `remember` | Save durable repository memory; the result may require review. |
+| `get_memory_brief` | Read the memory your team has published for a repository, once at the start of a task. Read-only. |
+| `recall`, `memories_about` | Retrieve saved repository context for specific questions. |
+| `remember` | Save a settled decision or gotcha as repository memory; the result may require review. |
 
 ## Data handling and limitations
 
@@ -50,11 +51,9 @@ workspace permissions, and returned code context becomes available to the Cursor
 agent. Do not put secrets or unrelated private information in queries.
 
 The MCP tools do not edit source files. They are **not all read-only**:
-`remember` persists memory and `set_workspace` changes account scope. When trail
-capture is enabled for a workspace, `query_graph`, `graphify_trace`,
-`graphify_find`, and `graphify_rank_files` may save query/search context as
-repository memory; `recall` may record an unanswered memory query. Follow the
-live tool annotations and Cursor's approval prompts.
+`remember` persists memory and `set_workspace` changes account scope. No other
+tool saves memory. Follow the live tool annotations and Cursor's approval
+prompts.
 
 Results describe an indexed snapshot, not necessarily the current branch or
 uncommitted edits. Inspect local code before changing it. Static graph analysis

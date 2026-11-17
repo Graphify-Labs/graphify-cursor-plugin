@@ -1,6 +1,7 @@
 # Cursor marketplace submission
 
-Prepared on 2026-09-30 for Graphify 0.1.2. This is submission preparation, not a
+Prepared on 2026-09-30 for Graphify 0.1.2 and updated on 2026-11-17 for 0.1.3.
+This is submission preparation, not a
 claim of approval or an existing public listing.
 
 ## Current status
@@ -9,7 +10,12 @@ claim of approval or an existing public listing.
 - Native Cursor manifest, committed logo, remote MCP configuration, and rule:
   present; the nested package is listed in the root marketplace manifest.
 - Plugin instructions now use the server's real tool names and disclose memory
-  writes, optional trail capture, workspace changes, and indexed-data limitations.
+  writes, workspace changes, and indexed-data limitations.
+- Version 0.1.3 changes guidance only: it adds the read-only `get_memory_brief`
+  tool and removes the old trail-capture wording, since Graphify no longer saves
+  memory passively. `get_memory_brief` must be live on the server before this
+  guidance is published; the update was statically reviewed, not tested in an
+  agent conversation.
 - Metadata, local configuration, and component checks pass locally. CI runs
   `node scripts/validate-template.mjs` on pull requests and pushes to `main`.
 - Live unauthenticated checks on 2026-09-30: `GET /mcp` returned 401 with a
@@ -49,7 +55,7 @@ Field names and additional requirements may differ.
 | Package directory | `plugins/graphify` |
 | Marketplace manifest | `.cursor-plugin/marketplace.json` |
 | Plugin manifest | `plugins/graphify/.cursor-plugin/plugin.json` |
-| Version | `0.1.2` |
+| Version | `0.1.3` |
 | Website | https://graphify.com |
 | Support | founders@graphify.com |
 | Issue tracker | https://github.com/Graphify-Labs/graphify-cursor-plugin/issues |
@@ -76,18 +82,23 @@ against local files before edits.
 
 A Graphify account and an indexed repository are required. Sign in through OAuth
 and choose an authorized workspace and repository. Results reflect the indexed
-snapshot; graph analysis does not run tests or prove runtime behavior. Some tools
-persist repository memory, optional query trails, or workspace preferences, as
-described in their live schemas and the plugin README. Symbol lookup may return
+snapshot; graph analysis does not run tests or prove runtime behavior. Memory is
+saved only when the agent calls `remember`, and `set_workspace` changes the
+default workspace, as described in the live schemas and the plugin README. Symbol lookup may return
 a labelled semantic suggestion when no exact match is available; verify the
 returned symbol and file before relying on it.
 
 **Release notes**
 
-Updated the bundled Graphify logo. Clarified semantic symbol suggestions and empty
-caller results in the agent rule and usage guide. Recorded successful local loading,
-authenticated discovery, and exact code lookup, with the remaining test coverage
-stated explicitly.
+0.1.3: The agent rule and usage guide now describe the read-only `get_memory_brief`
+tool, read once at the start of work in an indexed repository, with `recall` for
+specifics and `remember` for settled decisions or gotchas. Removed outdated memory
+wording.
+
+0.1.2: Updated the bundled Graphify logo. Clarified semantic symbol suggestions and
+empty caller results in the agent rule and usage guide. Recorded successful local
+loading, authenticated discovery, and exact code lookup, with the remaining test
+coverage stated explicitly.
 
 ## Local smoke test
 
@@ -122,7 +133,7 @@ and pass/fail results:
 | Code evidence | Ask "Using Graphify, locate a known symbol in this repository and cite its file." Check the answer against an actual indexed file. |
 | Dependencies | Ask for callers or a path between two known connected symbols. Confirm the returned direction and evidence. |
 | Limitations | Ask for a deliberately nonexistent symbol. Inspect `resolved` and the returned symbol/file. A semantic fallback must be disclosed as a suggestion, not presented as proof that the requested exact symbol exists. |
-| Memory and approvals | Read existing repository memory. Only test `remember` if intentionally saving a test note; verify the returned save/review status. Do not change workspace unless intended. |
+| Memory and approvals | Read the memory brief and existing repository memory. Only test `remember` if intentionally saving a test note; verify the returned save/review status. Do not change workspace unless intended. |
 
 Do not claim these authenticated tests passed until they have been performed.
 Keep private repository IDs, query results, tokens, and reviewer credentials out
@@ -130,7 +141,8 @@ of public issues, screenshots, and this repository.
 
 ## Final publisher steps
 
-1. Merge the 0.1.2 guidance update after reviewing its changes and CI result.
+1. Merge the 0.1.3 guidance update after `get_memory_brief` is live on the
+   server, reviewing its changes and CI result.
 2. Review the recorded smoke-test results and coverage above. Rerun applicable
    checks if the connection configuration or server behavior changes.
 3. Sign in at [Cursor's publisher application](https://cursor.com/marketplace/publish).
