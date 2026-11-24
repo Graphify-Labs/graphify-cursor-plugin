@@ -185,8 +185,10 @@ async function validateFrontmatterFile(filePath, componentName, requiredKeys, pl
 }
 
 async function validateComponentFrontmatter(pluginDir, pluginName) {
-  const rulesDir = path.join(pluginDir, "rules");
-  if (await pathExists(rulesDir)) {
+  // rules/ holds the Antigravity rule and cursor-rules/ holds the Cursor rule.
+  for (const dirName of ["rules", "cursor-rules"]) {
+    const rulesDir = path.join(pluginDir, dirName);
+    if (!(await pathExists(rulesDir))) continue;
     const files = await walkFiles(rulesDir);
     for (const file of files) {
       const ext = path.extname(file).toLowerCase();
@@ -243,7 +245,7 @@ async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) 
   if (typeof manifest.author?.name !== "string" || !manifest.author.name.trim()) {
     addError("graphify: author.name must be nonempty.");
   }
-  for (const file of ["README.md", "rules/graphify.mdc"]) {
+  for (const file of ["README.md", "cursor-rules/graphify.mdc"]) {
     if (!(await pathExists(path.join(pluginDir, file)))) {
       addError(`graphify: required package file is missing: ${file}`);
     }
@@ -259,6 +261,45 @@ async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) 
       Object.keys(servers).length !== 1 || !server || Array.isArray(server) ||
       Object.keys(server).length !== 1 || server.url !== "https://api.graphify.com/mcp") {
     addError("graphify: mcp.json must contain only mcpServers.graphify.url = https://api.graphify.com/mcp (no credentials, commands, or extra servers).");
+  }
+  await validateAntigravityPackage(pluginDir, manifest);
+}
+
+// Antigravity reads .antigravity-plugin/plugin.json, mcp_config.json and rules/*.md
+// from the same plugin folder. Keep its connection and metadata in step with Cursor's.
+async function validateAntigravityPackage(pluginDir, cursorManifest) {
+  const manifest = await readJsonFile(
+    path.join(pluginDir, ".antigravity-plugin", "plugin.json"),
+    "Graphify Antigravity manifest"
+  );
+  if (!manifest) return;
+  for (const field of ["name", "displayName", "description", "version", "logo"]) {
+    if (typeof manifest[field] !== "string" || !manifest[field].trim()) {
+      addError(`graphify: Antigravity manifest "${field}" must be nonempty.`);
+    }
+  }
+  if (manifest.name !== cursorManifest.name || manifest.version !== cursorManifest.version) {
+    addError("graphify: Antigravity and Cursor manifests must share name and version.");
+  }
+  if (typeof manifest.author?.name !== "string" || !manifest.author.name.trim()) {
+    addError("graphify: Antigravity author.name must be nonempty.");
+  }
+  if (!Array.isArray(manifest.suggestedPrompts) || manifest.suggestedPrompts.length < 1 ||
+      manifest.suggestedPrompts.length > 3) {
+    addError("graphify: Antigravity suggestedPrompts must list one to three prompts.");
+  }
+  await validateReferencedPath(pluginDir, "logo", manifest.logo, "graphify");
+  for (const file of [".antigravity-plugin/README.md", "rules/graphify.md"]) {
+    if (!(await pathExists(path.join(pluginDir, file)))) {
+      addError(`graphify: required Antigravity file is missing: ${file}`);
+    }
+  }
+  const config = await readJsonFile(path.join(pluginDir, "mcp_config.json"), "Graphify Antigravity MCP configuration");
+  if (!config) return;
+  const server = config.mcpServers?.graphify;
+  if (Object.keys(config).length !== 1 || Object.keys(config.mcpServers ?? {}).length !== 1 ||
+      !server || Object.keys(server).length !== 1 || server.serverUrl !== "https://api.graphify.com/mcp") {
+    addError("graphify: mcp_config.json must contain only mcpServers.graphify.serverUrl = https://api.graphify.com/mcp.");
   }
 }
 

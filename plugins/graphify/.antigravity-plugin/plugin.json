@@ -1,0 +1,30 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "graphify",
+  "displayName": "Graphify",
+  "version": "0.1.2",
+  "description": "Search indexed code, trace callers and dependencies, check change impact, and recall repository memory through Graphify's authenticated MCP server.",
+  "logo": "assets/logo-antigravity.png",
+  "suggestedPrompts": [
+    "List my Graphify workspaces and repositories",
+    "Using Graphify, find where authentication is implemented in this repository and cite the files",
+    "Which linked tests should I check before changing this function?"
+  ],
+  "author": {
+    "name": "Graphify Labs",
+    "email": "founders@graphify.com",
+    "url": "https://graphify.com"
+  },
+  "homepage": "https://graphify.com",
+  "repository": "https://github.com/Graphify-Labs/graphify-cursor-plugin",
+  "license": "MIT",
+  "keywords": [
+    "graphify",
+    "mcp",
+    "code graph",
+    "code search",
+    "codebase context",
+    "repository memory",
+    "change impact"
+  ]
+}

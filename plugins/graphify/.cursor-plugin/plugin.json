@@ -19,5 +19,6 @@
     "codebase context",
     "code review"
   ],
-  "logo": "assets/logo.png"
+  "logo": "assets/logo.png",
+  "rules": "./cursor-rules/graphify.mdc"
 }

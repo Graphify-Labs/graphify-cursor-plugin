@@ -18,3 +18,9 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/validate-template.mjs
+      - name: Validate the Antigravity package
+        run: |
+          curl -fsSL https://antigravity.google/cli/install.sh | bash
+          "$HOME/.local/bin/agy" plugin validate --json plugins/graphify | tee agy-report.json
+          # mcp.json is the Cursor connection; Antigravity reads mcp_config.json and warns that it ignores mcp.json.
+          jq -e '.manifest as $manifest | [.findings[] | select(.severity == "error" or (.severity == "warning" and (.file != ".mcp.json" and .file != "mcp.json" and .file != "AGENTS.md") and (.file != "plugin.json" or $manifest == "plugin.json")))] | length == 0' agy-report.json
