@@ -253,6 +253,8 @@ async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) 
   if (manifest.mcpServers !== undefined) {
     addError("graphify: keep the OAuth connection in the default mcp.json, without a manifest override.");
   }
+  // Check Antigravity first so a broken Cursor mcp.json cannot hide its findings.
+  await validateAntigravityPackage(pluginDir, manifest);
   const config = await readJsonFile(path.join(pluginDir, "mcp.json"), "Graphify MCP configuration");
   if (!config) return;
   const servers = config.mcpServers;
@@ -262,7 +264,6 @@ async function validateGraphifyPackage(pluginDir, manifest, marketplaceVersion) 
       Object.keys(server).length !== 1 || server.url !== "https://api.graphify.com/mcp") {
     addError("graphify: mcp.json must contain only mcpServers.graphify.url = https://api.graphify.com/mcp (no credentials, commands, or extra servers).");
   }
-  await validateAntigravityPackage(pluginDir, manifest);
 }
 
 // Antigravity reads .antigravity-plugin/plugin.json, mcp_config.json and rules/*.md
